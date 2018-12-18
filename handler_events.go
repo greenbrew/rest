@@ -19,8 +19,6 @@
 
 package rest
 
-import "net/http"
-
-func eventsGet(d *Daemon, r *http.Request) Response {
-	return &eventsResponse{req: r, events: d.events}
+func eventsGet(r *Request) Response {
+	return &eventsResponse{req: r.HTTPRequest, events: r.daemon.events}
 }

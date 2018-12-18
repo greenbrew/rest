@@ -20,7 +20,6 @@
 package rest
 
 import (
-	"net/http"
 	"strconv"
 	"strings"
 
@@ -28,10 +27,10 @@ import (
 	"github.com/greenbrew/rest/api"
 )
 
-func operationsGet(d *Daemon, r *http.Request) Response {
+func operationsGet(r *Request) Response {
 	md := jmap{}
-	recursion := IsRecursionRequest(r)
-	ops := d.cache.getOperationsMap()
+	recursion := r.IsRecursionRequest()
+	ops := r.daemon.cache.getOperationsMap()
 
 	for _, v := range ops {
 		status := strings.ToLower(v.status.String())
@@ -60,10 +59,10 @@ func operationsGet(d *Daemon, r *http.Request) Response {
 	return SyncResponse(true, md)
 }
 
-func operationGet(d *Daemon, r *http.Request) Response {
-	id := mux.Vars(r)["id"]
+func operationGet(r *Request) Response {
+	id := mux.Vars(r.HTTPRequest)["id"]
 
-	op, err := d.cache.getOperationByID(id)
+	op, err := r.daemon.cache.getOperationByID(id)
 	if err != nil {
 		return SmartError(err)
 	}
@@ -77,10 +76,10 @@ func operationGet(d *Daemon, r *http.Request) Response {
 	return SyncResponse(true, body)
 }
 
-func operationWaitGet(d *Daemon, r *http.Request) Response {
+func operationWaitGet(r *Request) Response {
 	var err error
 	timeout := -1
-	t := r.FormValue("timeout")
+	t := r.HTTPRequest.FormValue("timeout")
 	if len(t) > 0 {
 		timeout, err = strconv.Atoi(t)
 		if err != nil {
@@ -88,8 +87,8 @@ func operationWaitGet(d *Daemon, r *http.Request) Response {
 		}
 	}
 
-	id := mux.Vars(r)["id"]
-	op, err := d.cache.getOperationByID(id)
+	id := mux.Vars(r.HTTPRequest)["id"]
+	op, err := r.daemon.cache.getOperationByID(id)
 	if err != nil {
 		return SmartError(err)
 	}

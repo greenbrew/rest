@@ -21,6 +21,7 @@ package rest
 
 import (
 	"context"
+	"path/filepath"
 	"sync"
 	"time"
 
@@ -44,6 +45,10 @@ type Operation struct {
 	errStr      string
 	description string
 	cancel      context.CancelFunc
+
+	// API version for the resources of this operation. Taken from the
+	// handler context where this operation is created
+	version string
 
 	// Operation handlers
 	onRun    func(*Operation) error
@@ -77,7 +82,7 @@ func (op *Operation) Render() (string, *api.Operation, error) {
 		for key, value := range resources {
 			var values []string
 			for _, c := range value {
-				values = append(values, api.Path(key, c))
+				values = append(values, filepath.Join(op.version, key, c))
 			}
 			tmpResources[key] = values
 		}

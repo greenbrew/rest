@@ -25,9 +25,9 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/greenbrew/rest/api"
 	"github.com/pborman/uuid"
 	"github.com/pkg/errors"
-	"github.com/greenbrew/rest/api"
 	check "gopkg.in/check.v1"
 )
 
@@ -84,7 +84,7 @@ func (s *responseOperationSuite) TestOperationResponse(c *check.C) {
 	for k, v := range op.resources {
 		var vals []string
 		for _, c := range v {
-			vals = append(vals, api.Path(k, c))
+			vals = append(vals, filepath.Join(k, c))
 		}
 		formattedResources[k] = vals
 	}

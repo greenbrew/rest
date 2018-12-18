@@ -25,7 +25,7 @@ import (
 	"github.com/greenbrew/rest/api"
 )
 
-type responseFunc func(*Daemon, *http.Request) Response
+type handlerFunc func(*Request) Response
 
 // MiddlewareFunc describes a function uses to process a HTTP request
 // as a middleman
@@ -43,11 +43,11 @@ type Command struct {
 	Name       string
 	Middleware MiddlewareFunc
 
-	GET    responseFunc
-	PUT    responseFunc
-	POST   responseFunc
-	DELETE responseFunc
-	PATCH  responseFunc
+	GET    handlerFunc
+	PUT    handlerFunc
+	POST   handlerFunc
+	DELETE handlerFunc
+	PATCH  handlerFunc
 }
 
 var builtinAPI = &API{

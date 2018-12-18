@@ -229,11 +229,11 @@ func (s *daemonSuite) TestAPI(c *check.C) {
 
 }
 
-func whateverGet(d *Daemon, r *http.Request) Response {
-	return SyncResponse(true, []string{filepath.Join(r.URL.Path, "1")})
+func whateverGet(r *Request) Response {
+	return SyncResponse(true, []string{filepath.Join(r.HTTPRequest.URL.Path, "1")})
 }
 
-func whateverPost(d *Daemon, r *http.Request) Response {
+func whateverPost(r *Request) Response {
 	run := func(op *Operation) error {
 		return nil
 	}
@@ -241,14 +241,14 @@ func whateverPost(d *Daemon, r *http.Request) Response {
 	resources := map[string][]string{}
 	resources["whatever"] = []string{"1"}
 
-	op, err := d.CreateOperation("Creating whatever", resources, nil, run, nil)
+	op, err := r.CreateOperation("Creating whatever", resources, nil, run, nil)
 	if err != nil {
 		return InternalError(err)
 	}
 	return OperationResponse(op)
 }
 
-func notFoundResourceGet(d *Daemon, r *http.Request) Response {
+func notFoundResourceGet(r *Request) Response {
 	return NotFound
 }
 

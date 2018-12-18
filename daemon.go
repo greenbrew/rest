@@ -20,20 +20,16 @@
 package rest
 
 import (
-	"context"
 	"net/http"
 	"path/filepath"
 	"strconv"
 	"strings"
 	"sync"
-	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/greenbrew/rest/api"
 	"github.com/greenbrew/rest/endpoints"
 	"github.com/greenbrew/rest/logger"
 	"github.com/greenbrew/rest/pool"
-	"github.com/pborman/uuid"
 	"github.com/pkg/errors"
 )
 
@@ -132,53 +128,6 @@ func (d *Daemon) Shutdown() error {
 	return errors.New(strings.Join(errs, " - "))
 }
 
-// CreateOperation creates an operation to be executed asynchronously
-func (d *Daemon) CreateOperation(
-	description string,
-	opResources map[string][]string,
-	opMetadata interface{},
-	onRun func(*Operation) error,
-	cancel context.CancelFunc) (*Operation, error) {
-
-	// Main attributes
-	op := &Operation{}
-	op.id = uuid.NewRandom().String()
-	op.description = description
-	op.createdAt = time.Now()
-	op.updatedAt = op.createdAt
-	op.status = api.Pending
-	op.url = filepath.Join(api.Version, "operations", op.id)
-	op.resources = opResources
-	op.doneCh = make(chan error)
-
-	var err error
-	op.metadata, err = parseMetadata(opMetadata)
-	if err != nil {
-		return nil, err
-	}
-
-	op.onRun = onRun
-	op.cancel = cancel
-
-	if d.dispatcher != nil {
-		op.operationsQueue = d.dispatcher.Queue
-	}
-
-	if d.cache == nil {
-		return nil, errors.New("Cache not initialized")
-	}
-	op.cache = d.cache
-	op.cache.addOperation(op)
-
-	logger.Debugf("New operation: %s", op.id)
-	_, md, _ := op.Render()
-
-	op.events = d.events
-	op.events.send(md)
-
-	return op, nil
-}
-
 func (d *Daemon) checkTLSConfig() {
 	// Try TLS enabled by default
 	d.schema = "https"
@@ -208,7 +157,7 @@ func (d *Daemon) createCmd(api *API, c *Command) {
 		w.Header().Set("Content-Type", "application/json")
 
 		var resp Response
-		var rspf responseFunc
+		var handler handlerFunc
 
 		switch r.Method {
 		case "HEAD":
@@ -216,22 +165,27 @@ func (d *Daemon) createCmd(api *API, c *Command) {
 			w = &hijack{w}
 			fallthrough
 		case "GET":
-			rspf = c.GET
+			handler = c.GET
 		case "PUT":
-			rspf = c.PUT
+			handler = c.PUT
 		case "POST":
-			rspf = c.POST
+			handler = c.POST
 		case "DELETE":
-			rspf = c.DELETE
+			handler = c.DELETE
 		case "PATCH":
-			rspf = c.PATCH
+			handler = c.PATCH
 		default:
 			resp = NotImplemented
 		}
 
 		if resp == nil {
-			if rspf != nil {
-				resp = rspf(d, r)
+			if handler != nil {
+				req := &Request{
+					HTTPRequest: r,
+					daemon:      d,
+					version:     api.Version,
+				}
+				resp = handler(req)
 			} else {
 				resp = NotFound
 			}
