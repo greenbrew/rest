@@ -128,7 +128,7 @@ func generateMemCert(certType CertificateType) ([]byte, []byte, error) {
 	template := x509.Certificate{
 		SerialNumber: serialNumber,
 		Subject: pkix.Name{
-			Organization: []string{"anbox.io"},
+			Organization: []string{"greenbrew.io"},
 			CommonName:   fmt.Sprintf("%s@%s", username, hostname),
 		},
 		NotBefore: validFrom,

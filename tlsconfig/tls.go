@@ -19,7 +19,10 @@
 
 package tlsconfig
 
-import "crypto/tls"
+import (
+	"crypto/tls"
+	"crypto/x509"
+)
 
 // New returns a tls.Config populated with default encryption
 // parameters. This is used as baseline config server certificate
@@ -39,4 +42,30 @@ func New() *tls.Config {
 		},
 		PreferServerCipherSuites: true,
 	}
+}
+
+// Finalize finalizes TLSConfig by adding a remote certificate
+func Finalize(tlsConfig *tls.Config, tlsRemoteCert *x509.Certificate) {
+	// Trusted certificates
+	if tlsRemoteCert != nil {
+		caCertPool := tlsConfig.RootCAs
+		if caCertPool == nil {
+			caCertPool = x509.NewCertPool()
+		}
+
+		// Make it a valid RootCA
+		tlsRemoteCert.IsCA = true
+		tlsRemoteCert.KeyUsage = x509.KeyUsageCertSign
+
+		// Setup the pool
+		caCertPool.AddCert(tlsRemoteCert)
+		tlsConfig.RootCAs = caCertPool
+
+		// Set the ServerName
+		if tlsRemoteCert.DNSNames != nil {
+			tlsConfig.ServerName = tlsRemoteCert.DNSNames[0]
+		}
+	}
+
+	tlsConfig.BuildNameToCertificate()
 }

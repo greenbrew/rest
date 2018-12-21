@@ -26,7 +26,22 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"os"
 )
+
+// Save writes out a x509 certificate to a file
+func Save(c *x509.Certificate, fileName string) error {
+	certFile, err := os.Create(fileName)
+	if err != nil {
+		return err
+	}
+
+	if err := pem.Encode(certFile, &pem.Block{Type: "CERTIFICATE", Bytes: c.Raw}); err != nil {
+		return err
+	}
+
+	return certFile.Close()
+}
 
 // Read reads an x509 certificate from a filepath
 func Read(path string) (*x509.Certificate, error) {
