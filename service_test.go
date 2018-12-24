@@ -49,7 +49,7 @@ func (s *daemonSuite) SetUpTest(c *check.C) {
 }
 
 func (s *daemonSuite) TestCannotStartWithoutEndpoints(c *check.C) {
-	d := Daemon{}
+	d := Service{}
 	d.Init([]*API{})
 	err := d.Start()
 	c.Assert(err, check.ErrorMatches, "Failed to start service: No endpoint configured")
@@ -60,7 +60,7 @@ func (s *daemonSuite) TestCanStartUnixSocket(c *check.C) {
 	c.Assert(err, check.IsNil)
 
 	unixSocketPath := filepath.Join(tmpDir, "unix.socket")
-	d := Daemon{
+	d := Service{
 		UnixSocketPath: unixSocketPath,
 	}
 
@@ -81,7 +81,7 @@ func (s *daemonSuite) TestCanStartHTTP(c *check.C) {
 	host, err := os.Hostname()
 	c.Assert(err, check.IsNil)
 
-	d := Daemon{
+	d := Service{
 		Host: host,
 		Port: port,
 	}
@@ -101,7 +101,7 @@ func (s *daemonSuite) TestCanStartHTTPWithOnlyPort(c *check.C) {
 	port, err := freeport.GetFreePort()
 	c.Assert(err, check.IsNil)
 
-	d := Daemon{
+	d := Service{
 		Port: port,
 	}
 
@@ -130,7 +130,7 @@ func (s *daemonSuite) TestCanStartHTTPS(c *check.C) {
 	err = cert.FindOrGenerate(certPath, keyPath, cert.ServerCertificateType)
 	c.Assert(err, check.IsNil)
 
-	d := Daemon{
+	d := Service{
 		Port:           port,
 		ServerCertPath: certPath,
 		ServerKeyPath:  keyPath,
@@ -170,7 +170,7 @@ func (s *daemonSuite) TestAPI(c *check.C) {
 	port, err := freeport.GetFreePort()
 	c.Assert(err, check.IsNil)
 
-	d := Daemon{
+	d := Service{
 		Port: port,
 	}
 

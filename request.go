@@ -35,7 +35,7 @@ import (
 // Request represents the context of a REST request
 type Request struct {
 	HTTPRequest *http.Request
-	daemon      *Daemon
+	daemon      *Service
 	version     string
 }
 

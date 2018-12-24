@@ -33,8 +33,8 @@ import (
 	"github.com/pkg/errors"
 )
 
-// A Daemon can respond to http requests to the REST API
-type Daemon struct {
+// A Service can respond to http requests to the REST API
+type Service struct {
 	// Endpoint services to start at the same time.
 	endpoints []endpoints.EndpointEngine
 	events    *eventsManager
@@ -65,7 +65,7 @@ type Daemon struct {
 
 // Init initializes REST service daemon by creating mux router if not created, populate
 // router with defined array of APIs, open and setup database
-func (d *Daemon) Init(apis []*API) {
+func (d *Service) Init(apis []*API) {
 	if d.Router == nil {
 		d.Router = mux.NewRouter()
 		d.Router.StrictSlash(true)
@@ -93,7 +93,7 @@ func (d *Daemon) Init(apis []*API) {
 }
 
 // Start starts the daemon on the configure endpoint
-func (d *Daemon) Start() error {
+func (d *Service) Start() error {
 	if d.dispatcher != nil {
 		d.dispatcher.Start()
 	}
@@ -107,7 +107,7 @@ func (d *Daemon) Start() error {
 }
 
 // Shutdown additional tasks when service shutdown
-func (d *Daemon) Shutdown() error {
+func (d *Service) Shutdown() error {
 	var errs []string
 	for _, ep := range d.endpoints {
 		err := ep.Stop()
@@ -128,7 +128,7 @@ func (d *Daemon) Shutdown() error {
 	return errors.New(strings.Join(errs, " - "))
 }
 
-func (d *Daemon) checkTLSConfig() {
+func (d *Service) checkTLSConfig() {
 	// Try TLS enabled by default
 	d.schema = "https"
 	if len(d.ServerCertPath) == 0 || len(d.ServerKeyPath) == 0 {
@@ -136,11 +136,11 @@ func (d *Daemon) checkTLSConfig() {
 	}
 }
 
-func (d *Daemon) poolEnabled() bool {
+func (d *Service) poolEnabled() bool {
 	return d.MaxConcurrentOperations > 0 || d.MaxQueuedOperations > 0
 }
 
-func (d *Daemon) createCmd(api *API, c *Command) {
+func (d *Service) createCmd(api *API, c *Command) {
 	uri := filepath.Join("/", api.Version, c.Name)
 
 	// Compose middlewares to be applied from ext to in:
@@ -200,7 +200,7 @@ func (d *Daemon) createCmd(api *API, c *Command) {
 	})))
 }
 
-func (d *Daemon) startEndpoints() error {
+func (d *Service) startEndpoints() error {
 	// Add unix socket endpoint
 	if len(d.UnixSocketPath) > 0 {
 		localEp := endpoints.NewLocalEndpoint(d.Router, d.UnixSocketPath, d.UnixSocketOwner)
@@ -239,11 +239,11 @@ func (d *Daemon) startEndpoints() error {
 	return nil
 }
 
-func (d *Daemon) tlsEnabled() bool {
+func (d *Service) tlsEnabled() bool {
 	return d.schema == "https"
 }
 
-func (d *Daemon) serve(ep endpoints.EndpointEngine, wg *sync.WaitGroup) {
+func (d *Service) serve(ep endpoints.EndpointEngine, wg *sync.WaitGroup) {
 	go func(ep endpoints.EndpointEngine, wg *sync.WaitGroup) {
 		if err := ep.Start(wg); err != nil {
 			logger.Errorf("Could not start endpoint: %v", err)
@@ -251,7 +251,7 @@ func (d *Daemon) serve(ep endpoints.EndpointEngine, wg *sync.WaitGroup) {
 	}(ep, wg)
 }
 
-func (d *Daemon) serverAddress() string {
+func (d *Service) serverAddress() string {
 	ip := ""
 	if len(d.Host) > 0 {
 		ip = d.Host
