@@ -75,7 +75,7 @@ func (s *daemonSuite) TestCanStartUnixSocket(c *check.C) {
 }
 
 func (s *daemonSuite) TestCanStartHTTP(c *check.C) {
-	port, err := freeport.GetFreePort()
+	port, err := freeport.Get()
 	c.Assert(err, check.IsNil)
 
 	host, err := os.Hostname()
@@ -98,7 +98,7 @@ func (s *daemonSuite) TestCanStartHTTP(c *check.C) {
 }
 
 func (s *daemonSuite) TestCanStartHTTPWithOnlyPort(c *check.C) {
-	port, err := freeport.GetFreePort()
+	port, err := freeport.Get()
 	c.Assert(err, check.IsNil)
 
 	d := Service{
@@ -118,7 +118,7 @@ func (s *daemonSuite) TestCanStartHTTPWithOnlyPort(c *check.C) {
 
 func (s *daemonSuite) TestCanStartHTTPS(c *check.C) {
 	// Find a free port
-	port, err := freeport.GetFreePort()
+	port, err := freeport.Get()
 	c.Assert(err, check.IsNil)
 
 	// Generate temporary server certificate for the test
@@ -167,7 +167,7 @@ func (s *daemonSuite) TestAPI(c *check.C) {
 	}
 
 	// Start the service
-	port, err := freeport.GetFreePort()
+	port, err := freeport.Get()
 	c.Assert(err, check.IsNil)
 
 	d := Service{

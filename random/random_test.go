@@ -17,30 +17,24 @@
  *
  */
 
-package freeport
+package random
 
 import (
-	"net"
-	"strconv"
 	"testing"
-
-	check "gopkg.in/check.v1"
 )
 
-func Test(t *testing.T) { check.TestingT(t) }
+func TestRandomGeneration(t *testing.T) {
+	n := 10
+	// search for random strings enough smalls as to see if they are random
+	tokens := make(map[string]string)
+	for i := 0; i < n; i++ {
+		// generate minimum amount of random data to verify it is enough random
+		token := New(10)
+		tokens[token] = token
+	}
 
-type freeportSuite struct{}
-
-var _ = check.Suite(&freeportSuite{})
-
-func (s *freeportSuite) TestGetFreePort(c *check.C) {
-	port, err := Get()
-	c.Assert(err, check.IsNil)
-	c.Assert(port, check.Not(check.Equals), 0)
-
-	// Try to listen on the port
-	l, err := net.Listen("tcp", "localhost"+":"+strconv.Itoa(port))
-	c.Assert(err, check.IsNil)
-
-	defer l.Close()
+	// Check that we have n different tokens stored in the map
+	if len(tokens) < n {
+		t.Error("Generated random numbers are not unique")
+	}
 }

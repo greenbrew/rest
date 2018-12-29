@@ -21,8 +21,8 @@ package freeport
 
 import "net"
 
-// GetFreePort requests for free open port that is ready to use.
-func GetFreePort() (int, error) {
+// Get requests for free open port that is ready to use.
+func Get() (int, error) {
 	addr, err := net.ResolveTCPAddr("tcp", "localhost:0")
 	if err != nil {
 		return 0, err

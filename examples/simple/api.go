@@ -17,30 +17,36 @@
  *
  */
 
-package freeport
+package simple
 
-import (
-	"net"
-	"strconv"
-	"testing"
+import "github.com/greenbrew/rest"
 
-	check "gopkg.in/check.v1"
-)
-
-func Test(t *testing.T) { check.TestingT(t) }
-
-type freeportSuite struct{}
-
-var _ = check.Suite(&freeportSuite{})
-
-func (s *freeportSuite) TestGetFreePort(c *check.C) {
-	port, err := Get()
-	c.Assert(err, check.IsNil)
-	c.Assert(port, check.Not(check.Equals), 0)
-
-	// Try to listen on the port
-	l, err := net.Listen("tcp", "localhost"+":"+strconv.Itoa(port))
-	c.Assert(err, check.IsNil)
-
-	defer l.Close()
+// API simple example exposed API
+var API = rest.API{
+	Version: "1.0",
+	Commands: []*rest.Command{
+		serviceCmd,
+		resourcesCmd,
+		resourceCmd,
+	},
 }
+
+var (
+	serviceCmd = &rest.Command{
+		Name: "",
+		GET:  serviceGet,
+	}
+
+	resourcesCmd = &rest.Command{
+		Name: "resources",
+		GET:  resourcesGet,
+		POST: resourcesPost,
+	}
+
+	resourceCmd = &rest.Command{
+		Name:   "resources/{id:[a-zA-Z0-9-_]+}",
+		GET:    resourceGet,
+		PUT:    resourcePut,
+		DELETE: resourceDelete,
+	}
+)
