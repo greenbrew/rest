@@ -1,0 +1,15 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: simple-server
+spec:
+  template:
+    metadata:
+      labels:
+        app: simple-server
+    spec:
+      containers:
+        - image: docker.io/rmescandon/go-examples:first 
+          name: simple-server
+          ports:
+            - containerPort: 8443
