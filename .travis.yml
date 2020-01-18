@@ -5,8 +5,7 @@ git:
   depth: 1
   quiet: true
 
-install:
-  go get -v ./...
+install: travis_install_go_dependencies 
 
 script:
-  go test -t -v
+  make test
