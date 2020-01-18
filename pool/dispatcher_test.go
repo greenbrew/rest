@@ -168,8 +168,12 @@ func (s *dispatcherSuite) TestUnattendedJobsAfterClosing(c *check.C) {
 	d.Stop(false)
 
 	// as first job is waiting forever while attended by unique worker,
-	// then, there should be in the queue the remaining ones
-	c.Assert(len(d.Queue.queue), check.Equals, nJobs-1)
+	// then, there should be in the queue the remaining ones.
+	// depending on how the sequence is resolved, at this point the queue
+	// will have more or less workers to finish, but never the nJobs
+	if len(d.Queue.queue) == nJobs {
+		c.Fail()
+	}
 
 	for i := 0; i < nJobs; i++ {
 		wg.Done()

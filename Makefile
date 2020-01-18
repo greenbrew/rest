@@ -1,22 +1,31 @@
 TAG?=$(shell git rev-list HEAD --max-count=1 --abbrev-commit)
 export TAG
 
+GO=go
+
+.PHONY: all
 all: test build pack
+
+.PHONY: test
 test:
-	go get -t ./...
-	go test ./...
+	$(GO) get -t ./...
+	$(GO) test ./...
 
+.PHONY: build
 build:
-	go get -t ./...
-	go build -ldflags "-X main.version=$(TAG)" -o server ./examples/simple/server/.
+	$(GO) get -t ./...
+	$(GO) build -ldflags "-X main.version=$(TAG)" -o server ./examples/simple/server/.
 
+.PHONY: install
 install:
-	go get -t ./...
-	go install  -ldflags "-X main.version=$(TAG)" ./examples/simple/server/.
+	$(GO) get -t ./...
+	$(GO) install  -ldflags "-X main.version=$(TAG)" ./examples/simple/server/.
 
+.PHONY: pack
 pack: build
 	docker build -t simple-server:${TAG} .
 
+.PHONY: clean
 clean:
-	go clean
-	rm -f server
+	$(GO) clean
+	@rm -f server

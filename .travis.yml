@@ -1,3 +1,14 @@
-script:
-  - make test
- 
+language: go
+go_import_path: github.com/greenbrew/rest
+
+git:
+  depth: 1
+  quiet: true
+
+install: go get -t -v ./...
+
+# Skip notifiations to the mail
+notifications: 
+  email: true
+
+script: go test -v ./...
