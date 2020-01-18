@@ -24,6 +24,7 @@ import (
 	"sync"
 	"sync/atomic"
 	"testing"
+	"time"
 
 	check "gopkg.in/check.v1"
 )
@@ -161,6 +162,7 @@ func (s *dispatcherSuite) TestUnattendedJobsAfterClosing(c *check.C) {
 		wg.Add(1)
 		err := d.Queue.Push(func() {
 			wg.Wait()
+			time.Sleep(time.Second)
 		})
 		c.Assert(err, check.IsNil)
 	}
