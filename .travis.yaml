@@ -1,4 +1,7 @@
-install: make
+language: go
+go_import_path: github.com/greenbrew/rest
+go:        
+  - 1.9
+
 script:
-  - sh -v make test
- 
+  - go test -v
