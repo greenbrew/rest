@@ -147,34 +147,38 @@ func (s *dispatcherSuite) TestCannotPushWhenQueueIsFull(c *check.C) {
 	c.Assert(d.Queue.Push(func() {}), check.Equals, ErrJobQueueFull)
 }
 
-// func (s *dispatcherSuite) TestUnattendedJobsAfterClosing(c *check.C) {
-// 	queueSize := 5
-// 	poolSize := 1
-// 	nJobs := 4
+func (s *dispatcherSuite) TestUnattendedJobsAfterClosing(c *check.C) {
+	queueSize := 5
+	poolSize := 1
+	nJobs := 4
 
-// 	d := NewDispatcher(queueSize, poolSize)
-// 	d.Start()
+	d := NewDispatcher(queueSize, poolSize)
+	d.Start()
 
-// 	// Let's add nJobs blocked during execution until the end of the tests
-// 	var wg sync.WaitGroup
-// 	for i := 0; i < nJobs; i++ {
-// 		wg.Add(1)
-// 		err := d.Queue.Push(func() {
-// 			wg.Wait()
-// 		})
-// 		c.Assert(err, check.IsNil)
-// 	}
+	// Let's add nJobs blocked during execution until the end of the tests
+	var wg sync.WaitGroup
+	for i := 0; i < nJobs; i++ {
+		wg.Add(1)
+		err := d.Queue.Push(func() {
+			wg.Wait()
+		})
+		c.Assert(err, check.IsNil)
+	}
 
-// 	d.Stop(false)
+	d.Stop(false)
 
-// 	// as first job is waiting forever while attended by unique worker,
-// 	// then, there should be in the queue the remaining ones
-// 	c.Assert(len(d.Queue.queue), check.Equals, nJobs-1)
+	// as first job is waiting forever while attended by unique worker,
+	// then, there should be in the queue the remaining ones.
+	// depending on how the sequence is resolved, at this point the queue
+	// will have more or less workers to finish, but never the nJobs
+	if len(d.Queue.queue) == nJobs {
+		c.Fail()
+	}
 
-// 	for i := 0; i < nJobs; i++ {
-// 		wg.Done()
-// 	}
-// }
+	for i := 0; i < nJobs; i++ {
+		wg.Done()
+	}
+}
 
 func (s *dispatcherSuite) TestDispatcherCanBeRestarted(c *check.C) {
 	firstCountOfJobs := 7
