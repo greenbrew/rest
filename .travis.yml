@@ -4,3 +4,9 @@ go_import_path: github.com/greenbrew/rest
 git:
   depth: 1
   quiet: true
+
+install:
+  go get -v ./...
+
+script:
+  go test -t -v
