@@ -1,3 +1,14 @@
+language: go
+go_import_path: github.com/greenbrew/rest
+
+git:
+  depth: 1
+  quiet: true
+
+install:
+  - echo "Using Go version $TRAVIS_GO_VERSION"
+  - echo "$GOPATH"
+  - go get ${gobuild_args} ./...
+
 script:
-  - make test
- 
+  go test ${gobuild_args} ./...
