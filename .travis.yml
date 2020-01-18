@@ -5,7 +5,10 @@ git:
   depth: 1
   quiet: true
 
-install: travis_install_go_dependencies 
+install: go get -t -v ./...
 
-script:
-  make test
+# Skip notifiations to the mail
+notifications: 
+  email: true
+
+script: go test -v ./...
